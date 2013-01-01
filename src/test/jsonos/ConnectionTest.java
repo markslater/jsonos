@@ -7,15 +7,12 @@ import org.teleal.cling.controlpoint.ActionCallback;
 import org.teleal.cling.model.action.ActionArgumentValue;
 import org.teleal.cling.model.action.ActionInvocation;
 import org.teleal.cling.model.message.UpnpResponse;
-import org.teleal.cling.model.message.header.DeviceTypeHeader;
 import org.teleal.cling.model.message.header.STAllHeader;
 import org.teleal.cling.model.message.header.UDADeviceTypeHeader;
 import org.teleal.cling.model.meta.Action;
 import org.teleal.cling.model.meta.LocalDevice;
 import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.Service;
-import org.teleal.cling.model.types.BooleanDatatype;
-import org.teleal.cling.model.types.Datatype;
 import org.teleal.cling.model.types.UDADeviceType;
 import org.teleal.cling.model.types.UDAServiceId;
 import org.teleal.cling.registry.DefaultRegistryListener;
@@ -120,6 +117,28 @@ public class ConnectionTest {
         // Let's wait 10 seconds for them to respond
         System.out.println("Waiting 10 seconds before shutting down...");
         Thread.sleep(10000);
+
+        // Release all resources and advertise BYEBYE to other UPnP devices
+        System.out.println("Stopping Cling...");
+        upnpService.shutdown();
+    }
+
+    @Test
+    public void findsZonePlayersWithAlarmRegistryListener() throws Exception {
+        // This will create necessary network resources for UPnP right away
+        System.out.println("Starting Cling...");
+        final AlarmRegistryListener alarmRegistryListener = new AlarmRegistryListener();
+        final UpnpService upnpService = new UpnpServiceImpl(alarmRegistryListener);
+
+        // Send a search message to all devices and services, they should respond soon
+        upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
+
+        // Let's wait 10 seconds for them to respond
+        System.out.println("Waiting 10 seconds before shutting down...");
+        for (int i = 0; i < 10; i++) {
+            System.out.println("alarmRegistryListener.getAlarmStatus().statusString() = " + alarmRegistryListener.getAlarmStatus().statusString());
+            Thread.sleep(1000);
+        }
 
         // Release all resources and advertise BYEBYE to other UPnP devices
         System.out.println("Stopping Cling...");
