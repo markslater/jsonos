@@ -8,6 +8,7 @@
     <SOURCES>
       <root url="file://$PROJECT_DIR$/lib/test" />
       <root url="file://$PROJECT_DIR$/lib/test" />
+      <root url="jar://$PROJECT_DIR$/lib/test/MultithreadedTC-1.01-source.zip!/MultithreadedTC-1.01-source/src" />
     </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/lib/test" recursive="false" />
     <jarDirectory url="file://$PROJECT_DIR$/lib/test" recursive="false" type="SOURCES" />
