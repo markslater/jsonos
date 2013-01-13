@@ -169,7 +169,6 @@ public class ConnectionTest {
         // Send a search message to all devices and services, they should respond soon
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
 
-
         // Let's wait 10 seconds for them to respond
         final AlarmDetailsListener alarmDetailsListener = new AlarmDetailsListener() {
             @Override

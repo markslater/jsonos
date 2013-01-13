@@ -21,7 +21,7 @@ import static java.util.Arrays.asList;
 public class AlarmRegistryListener extends DefaultRegistryListener {
 
     private static final DeviceType ZONE_PLAYER = new UDADeviceType("ZonePlayer");
-    public static final UDAServiceId ALARM_CLOCK = new UDAServiceId("AlarmClock");
+    private static final UDAServiceId ALARM_CLOCK = new UDAServiceId("AlarmClock");
 
     private final Object lock = new Object();
     private AlarmStatus alarmStatus = noDevicesKnown();
