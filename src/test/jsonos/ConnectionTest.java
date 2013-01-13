@@ -181,10 +181,11 @@ public class ConnectionTest {
                 System.out.println("detailsMessage = " + detailsMessage);
             }
         };
+
         try (final AlarmPollingService alarmPollingService = new AlarmPollingService(upnpService, alarmRegistryListener, alarmDetailsListener)) {
             alarmPollingService.start();
             System.out.println("Waiting 10 seconds before shutting down...");
-            Thread.sleep(10000);
+            Thread.sleep(100000);
         }
 
         // Release all resources and advertise BYEBYE to other UPnP devices

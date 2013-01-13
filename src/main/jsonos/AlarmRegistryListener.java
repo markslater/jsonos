@@ -2,12 +2,16 @@ package jsonos;
 
 import org.teleal.cling.UpnpService;
 import org.teleal.cling.controlpoint.ActionCallback;
+import org.teleal.cling.controlpoint.SubscriptionCallback;
 import org.teleal.cling.model.action.ActionInvocation;
+import org.teleal.cling.model.gena.CancelReason;
+import org.teleal.cling.model.gena.GENASubscription;
 import org.teleal.cling.model.message.UpnpResponse;
 import org.teleal.cling.model.meta.Action;
 import org.teleal.cling.model.meta.Device;
 import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.Service;
+import org.teleal.cling.model.state.StateVariableValue;
 import org.teleal.cling.model.types.DeviceType;
 import org.teleal.cling.model.types.UDADeviceType;
 import org.teleal.cling.model.types.UDAServiceId;
@@ -15,6 +19,7 @@ import org.teleal.cling.registry.DefaultRegistryListener;
 import org.teleal.cling.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 
@@ -95,22 +100,59 @@ public class AlarmRegistryListener extends DefaultRegistryListener {
         @Override
         public String alarms(final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener) {
             Service service = devices.iterator().next().findService(ALARM_CLOCK);
-            Action listAlarmsAction = service.getAction("ListAlarms");
-            ActionInvocation getStatusInvocation = new ActionInvocation(listAlarmsAction);
-            upnpService.getControlPoint().execute(new ActionCallback(getStatusInvocation) {
-
+            upnpService.getControlPoint().execute(new SubscriptionCallback(service) {
                 @Override
-                public void success(ActionInvocation invocation) {
-                    alarmDetailsListener.gotDetails(invocation.getOutput("CurrentAlarmList").toString());
+                protected void failed(GENASubscription subscription, UpnpResponse responseStatus, Exception exception, String defaultMsg) {
+                    System.err.println("Failed: " + defaultMsg);
                 }
 
                 @Override
-                public void failure(ActionInvocation invocation,
-                                    UpnpResponse operation,
-                                    String defaultMsg) {
-                    alarmDetailsListener.failedToGetDetails(defaultMsg);
+                protected void established(GENASubscription subscription) {
+                    System.out.println("Established: " + subscription.getSubscriptionId());
+                }
+
+                @Override
+                protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse responseStatus) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                protected void eventReceived(GENASubscription subscription) {
+                    System.out.println("Event: " + subscription.getCurrentSequence().getValue());
+
+                    Map<String, StateVariableValue> values = subscription.getCurrentValues();
+                    if (values.containsKey("AlarmListVersion")) {
+                        System.out.println("values.get(\"AlarmListVersion\") = " + values.get("AlarmListVersion"));
+                        Action listAlarmsAction = service.getAction("ListAlarms");
+                        ActionInvocation getStatusInvocation = new ActionInvocation(listAlarmsAction);
+                        upnpService.getControlPoint().execute(new ActionCallback(getStatusInvocation) {
+
+                            @Override
+                            public void success(ActionInvocation invocation) {
+                                final String currentAlarmList = invocation.getOutput("CurrentAlarmList").toString();
+                                System.out.println("currentAlarmList = " + currentAlarmList);
+                                alarmDetailsListener.gotDetails(currentAlarmList);
+                            }
+
+                            @Override
+                            public void failure(ActionInvocation invocation,
+                                                UpnpResponse operation,
+                                                String defaultMsg) {
+                                alarmDetailsListener.failedToGetDetails(defaultMsg);
+                            }
+                        });
+
+                    } else {
+                        System.out.println("No AlarmListVersion in event");
+                    }
+                }
+
+                @Override
+                protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {
+                    System.out.println("Missed events: " + numberOfMissedEvents);
                 }
             });
+
             return null;
         }
     }

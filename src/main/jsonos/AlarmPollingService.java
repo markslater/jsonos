@@ -20,12 +20,12 @@ public class AlarmPollingService implements AutoCloseable {
     }
 
     public void start() {
-        executor.scheduleWithFixedDelay(new Runnable() {
+        executor.schedule(new Runnable() {
             @Override
             public void run() {
                 alarmRegistryListener.getAlarmStatus().alarms(upnpService, alarmDetailsListener);
             }
-        }, 1, 1, TimeUnit.SECONDS);
+        }, 5, TimeUnit.SECONDS);
     }
 
     @Override
