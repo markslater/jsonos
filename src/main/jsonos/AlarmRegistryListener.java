@@ -1,9 +1,16 @@
 package jsonos;
 
+import org.teleal.cling.UpnpService;
+import org.teleal.cling.controlpoint.ActionCallback;
+import org.teleal.cling.model.action.ActionInvocation;
+import org.teleal.cling.model.message.UpnpResponse;
+import org.teleal.cling.model.meta.Action;
 import org.teleal.cling.model.meta.Device;
 import org.teleal.cling.model.meta.RemoteDevice;
+import org.teleal.cling.model.meta.Service;
 import org.teleal.cling.model.types.DeviceType;
 import org.teleal.cling.model.types.UDADeviceType;
+import org.teleal.cling.model.types.UDAServiceId;
 import org.teleal.cling.registry.DefaultRegistryListener;
 import org.teleal.cling.registry.Registry;
 
@@ -14,16 +21,13 @@ import static java.util.Arrays.asList;
 public class AlarmRegistryListener extends DefaultRegistryListener {
 
     private static final DeviceType ZONE_PLAYER = new UDADeviceType("ZonePlayer");
+    public static final UDAServiceId ALARM_CLOCK = new UDAServiceId("AlarmClock");
 
     private final Object lock = new Object();
     private AlarmStatus alarmStatus = noDevicesKnown();
 
     static AlarmStatus noDevicesKnown() {
         return new NoDevicesKnownAlarmStatus();
-    }
-
-    static AlarmStatus deviceKnownButNoAlarmsKnown(final Device device) {
-        return new DeviceKnownButNoAlarmsKnownAlarmStatus(asList(device));
     }
 
     @Override
@@ -52,8 +56,13 @@ public class AlarmRegistryListener extends DefaultRegistryListener {
         }
 
         @Override
+        public String alarms(final UpnpService upnpService, AlarmDetailsListener alarmDetailsListener) {
+            return "No devices to query for alarms.";
+        }
+
+        @Override
         public AlarmStatus deviceAdded(final Device device) {
-            return deviceKnownButNoAlarmsKnown(device);
+            return new DeviceKnownButNoAlarmsKnownAlarmStatus(asList(device));
         }
     }
 
@@ -82,5 +91,28 @@ public class AlarmRegistryListener extends DefaultRegistryListener {
         public String statusString() {
             return "A Zone Player has been found: " + devices;
         }
+
+        @Override
+        public String alarms(final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener) {
+            Service service = devices.iterator().next().findService(ALARM_CLOCK);
+            Action listAlarmsAction = service.getAction("ListAlarms");
+            ActionInvocation getStatusInvocation = new ActionInvocation(listAlarmsAction);
+            upnpService.getControlPoint().execute(new ActionCallback(getStatusInvocation) {
+
+                @Override
+                public void success(ActionInvocation invocation) {
+                    alarmDetailsListener.gotDetails(invocation.getOutput("CurrentAlarmList").toString());
+                }
+
+                @Override
+                public void failure(ActionInvocation invocation,
+                                    UpnpResponse operation,
+                                    String defaultMsg) {
+                    alarmDetailsListener.failedToGetDetails(defaultMsg);
+                }
+            });
+            return null;
+        }
     }
+
 }

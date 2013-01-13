@@ -133,11 +133,23 @@ public class ConnectionTest {
         // Send a search message to all devices and services, they should respond soon
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
 
+
         // Let's wait 10 seconds for them to respond
-        System.out.println("Waiting 10 seconds before shutting down...");
-        for (int i = 0; i < 10; i++) {
-            System.out.println("alarmRegistryListener.getAlarmStatus().statusString() = " + alarmRegistryListener.getAlarmStatus().statusString());
-            Thread.sleep(1000);
+        final AlarmDetailsListener alarmDetailsListener = new AlarmDetailsListener() {
+            @Override
+            public void gotDetails(String details) {
+                System.out.println("details = " + details);
+            }
+
+            @Override
+            public void failedToGetDetails(String detailsMessage) {
+                System.out.println("detailsMessage = " + detailsMessage);
+            }
+        };
+        try (final AlarmPollingService alarmPollingService = new AlarmPollingService(upnpService, alarmRegistryListener, alarmDetailsListener)) {
+            alarmPollingService.start();
+            System.out.println("Waiting 10 seconds before shutting down...");
+            Thread.sleep(10000);
         }
 
         // Release all resources and advertise BYEBYE to other UPnP devices
