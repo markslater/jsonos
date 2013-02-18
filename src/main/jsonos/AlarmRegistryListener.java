@@ -29,7 +29,12 @@ public class AlarmRegistryListener extends DefaultRegistryListener {
     private static final UDAServiceId ALARM_CLOCK = new UDAServiceId("AlarmClock");
 
     private final Object lock = new Object();
+    private final AlarmDetailsListener alarmDetailsListener;
     private AlarmStatus alarmStatus = noDevicesKnown();
+
+    public AlarmRegistryListener(AlarmDetailsListener alarmDetailsListener) {
+        this.alarmDetailsListener = alarmDetailsListener;
+    }
 
     static AlarmStatus noDevicesKnown() {
         return new NoDevicesKnownAlarmStatus();
@@ -38,7 +43,7 @@ public class AlarmRegistryListener extends DefaultRegistryListener {
     @Override
     public void remoteDeviceAdded(final Registry registry, final RemoteDevice device) {
         if (ZONE_PLAYER.equals(device.getType())) {
-            setAlarmStatus(getAlarmStatus().deviceAdded(device));
+            setAlarmStatus(getAlarmStatus().deviceAdded(device, registry.getUpnpService(), alarmDetailsListener));
         }
     }
 
@@ -55,50 +60,24 @@ public class AlarmRegistryListener extends DefaultRegistryListener {
     }
 
     private static class NoDevicesKnownAlarmStatus implements AlarmStatus {
-        @Override
-        public String statusString() {
-            return "No devices have been found.";
-        }
 
         @Override
-        public String alarms(final UpnpService upnpService, AlarmDetailsListener alarmDetailsListener) {
-            return "No devices to query for alarms.";
-        }
-
-        @Override
-        public AlarmStatus deviceAdded(final Device device) {
-            return new DeviceKnownButNoAlarmsKnownAlarmStatus(asList(device));
+        public AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener) {
+            return new DeviceKnownButNoAlarmsKnownAlarmStatus(asList(device), upnpService, alarmDetailsListener);
         }
     }
 
     private static class DeviceKnownButNoAlarmsKnownAlarmStatus implements AlarmStatus {
         private final Iterable<Device> devices;
 
-        public DeviceKnownButNoAlarmsKnownAlarmStatus(final Iterable<Device> devices) {
+        public DeviceKnownButNoAlarmsKnownAlarmStatus(final Iterable<Device> devices, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener) {
             this.devices = new ArrayList<Device>() {{
                 for (final Device device : devices) {
                     add(device);
                 }
             }};
-        }
 
-        @Override
-        public AlarmStatus deviceAdded(final Device device) {
-            return new DeviceKnownButNoAlarmsKnownAlarmStatus(new ArrayList<Device>() {{
-                for (Device existingDevice : devices) {
-                    add(existingDevice);
-                }
-                add(device);
-            }});
-        }
-
-        @Override
-        public String statusString() {
-            return "A Zone Player has been found: " + devices;
-        }
-
-        @Override
-        public String alarms(final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener) {
+            // TODO - this only ought to happen if we don't have an existing subscription.
             Service service = devices.iterator().next().findService(ALARM_CLOCK);
             upnpService.getControlPoint().execute(new SubscriptionCallback(service) {
                 @Override
@@ -152,9 +131,18 @@ public class AlarmRegistryListener extends DefaultRegistryListener {
                     System.out.println("Missed events: " + numberOfMissedEvents);
                 }
             });
-
-            return null;
         }
+
+        @Override
+        public AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener) {
+            return new DeviceKnownButNoAlarmsKnownAlarmStatus(new ArrayList<Device>() {{
+                for (Device existingDevice : devices) {
+                    add(existingDevice);
+                }
+                add(device);
+            }}, upnpService, alarmDetailsListener);
+        }
+
     }
 
 }

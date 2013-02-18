@@ -4,9 +4,6 @@ import org.teleal.cling.UpnpService;
 import org.teleal.cling.model.meta.Device;
 
 public interface AlarmStatus {
-    AlarmStatus deviceAdded(final Device device);
+    AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener);
 
-    String statusString();
-
-    String alarms(final UpnpService upnpService, AlarmDetailsListener alarmDetailsListener);
 }

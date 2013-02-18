@@ -161,15 +161,6 @@ public class ConnectionTest {
 
     @Test
     public void findsZonePlayersWithAlarmRegistryListener() throws Exception {
-        // This will create necessary network resources for UPnP right away
-        System.out.println("Starting Cling...");
-        final AlarmRegistryListener alarmRegistryListener = new AlarmRegistryListener();
-        final UpnpService upnpService = new UpnpServiceImpl(alarmRegistryListener);
-
-        // Send a search message to all devices and services, they should respond soon
-        upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
-
-        // Let's wait 10 seconds for them to respond
         final AlarmDetailsListener alarmDetailsListener = new AlarmDetailsListener() {
             @Override
             public void gotDetails(String details) {
@@ -182,12 +173,15 @@ public class ConnectionTest {
             }
         };
 
-        try (final AlarmPollingService alarmPollingService = new AlarmPollingService(upnpService, alarmRegistryListener, alarmDetailsListener)) {
-            alarmPollingService.start();
-            System.out.println("Waiting 10 seconds before shutting down...");
-            Thread.sleep(100000);
-        }
+        // This will create necessary network resources for UPnP right away
+        System.out.println("Starting Cling...");
+        final AlarmRegistryListener alarmRegistryListener = new AlarmRegistryListener(alarmDetailsListener);
+        final UpnpService upnpService = new UpnpServiceImpl(alarmRegistryListener);
 
+        // Send a search message to all devices and services, they should respond soon
+        upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
+
+        Thread.sleep(100000);
         // Release all resources and advertise BYEBYE to other UPnP devices
         System.out.println("Stopping Cling...");
         upnpService.shutdown();
