@@ -8,7 +8,7 @@ import org.teleal.cling.registry.Registry;
 
 import static jsonos.AlarmStatus.noDevicesKnown;
 
-public class AlarmRegistryListener extends DefaultRegistryListener {
+public final class AlarmRegistryListener extends DefaultRegistryListener {
 
     private static final DeviceType ZONE_PLAYER = new UDADeviceType("ZonePlayer");
 
