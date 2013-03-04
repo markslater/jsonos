@@ -3,7 +3,8 @@ package jsonos;
 final class SysOutAlarmDetailsListener implements AlarmDetailsListener {
     @Override
     public void gotDetails(String details) {
-        System.out.println("details = " + details);
+        final Alarms alarms = Alarms.parse(details);
+        System.out.println("alarms = " + alarms);
     }
 
     @Override
