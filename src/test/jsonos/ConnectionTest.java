@@ -53,7 +53,7 @@ public class ConnectionTest {
         // Send a search message to all devices and services, they should respond soon
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
 
-        Thread.sleep(10000);
+        Thread.sleep(20000);
         // Release all resources and advertise BYEBYE to other UPnP devices
         System.out.println("Stopping Cling...");
         upnpService.shutdown();

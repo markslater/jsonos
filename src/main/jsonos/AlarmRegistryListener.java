@@ -23,7 +23,9 @@ public final class AlarmRegistryListener extends DefaultRegistryListener {
     @Override
     public void remoteDeviceAdded(final Registry registry, final RemoteDevice device) {
         if (ZONE_PLAYER.equals(device.getType())) {
-            setAlarmStatus(getAlarmStatus().deviceAdded(device, registry.getUpnpService(), alarmDetailsListener));
+            setAlarmStatus(
+                    getAlarmStatus().deviceAdded(device, registry.getUpnpService(), alarmDetailsListener)
+            );
         }
     }
 
