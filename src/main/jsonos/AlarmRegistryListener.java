@@ -16,8 +16,8 @@ public final class AlarmRegistryListener extends DefaultRegistryListener {
     private final AlarmDetailsListener alarmDetailsListener;
     private AlarmStatus alarmStatus = noDevicesKnown();
 
-    public AlarmRegistryListener(AlarmDetailsListener alarmDetailsListener) {
-        this.alarmDetailsListener = alarmDetailsListener;
+    public AlarmRegistryListener(AlarmsListener alarmDetailsListener) {
+        this.alarmDetailsListener = new ParsingAlarmDetailsListener(alarmDetailsListener);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class ConnectionTest {
 
         // This will create necessary network resources for UPnP right away
         System.out.println("Starting Cling...");
-        final UpnpService upnpService = new UpnpServiceImpl(new AlarmRegistryListener(new SysOutAlarmDetailsListener()));
+        final UpnpService upnpService = new UpnpServiceImpl(new AlarmRegistryListener(new SysOutAlarmsListener()));
 
         // Send a search message to all devices and services, they should respond soon
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
