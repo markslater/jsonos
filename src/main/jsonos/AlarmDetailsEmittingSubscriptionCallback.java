@@ -38,14 +38,10 @@ final class AlarmDetailsEmittingSubscriptionCallback extends SubscriptionCallbac
 
     @Override
     protected void eventReceived(GENASubscription subscription) {
-        System.out.println("Event: " + subscription.getCurrentSequence().getValue());
-
         Map<String, StateVariableValue> values = subscription.getCurrentValues();
         if (values.containsKey("AlarmListVersion")) {
-            System.out.println("values.get(\"AlarmListVersion\") = " + values.get("AlarmListVersion"));
             ActionInvocation getStatusInvocation = new ActionInvocation(service.getAction("ListAlarms"));
             upnpService.getControlPoint().execute(new ListAlarmsActionCallback(alarmDetailsListener, getStatusInvocation));
-
         } else {
             System.out.println("No AlarmListVersion in event");
         }
