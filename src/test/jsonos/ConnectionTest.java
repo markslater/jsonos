@@ -7,7 +7,7 @@ public class ConnectionTest {
     @Test
     public void findsZonePlayersWithAlarmRegistryListener() throws Exception {
         try (final SonosClient sonosClient = new SonosClient(new SysOutAlarmsListener())) {
-            Thread.sleep(10000);
+            Thread.sleep(180000);
         }
     }
 
