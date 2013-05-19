@@ -42,8 +42,8 @@ public final class SonosClient implements AutoCloseable {
 
     private final UpnpService upnpService;
 
-    public SonosClient(final AlarmsListener alarmsListener) {
-        upnpService = new UpnpServiceImpl(new AlarmRegistryListener(alarmsListener));
+    public SonosClient(final AlarmsListener alarmsListener, final UnexpectedEventsListener unexpectedEventsListener) {
+        upnpService = new UpnpServiceImpl(new AlarmRegistryListener(alarmsListener, unexpectedEventsListener));
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
     }
 

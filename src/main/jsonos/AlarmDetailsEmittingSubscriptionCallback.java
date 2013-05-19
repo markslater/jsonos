@@ -14,26 +14,28 @@ import java.util.Map;
 final class AlarmDetailsEmittingSubscriptionCallback extends SubscriptionCallback {
     private final UpnpService upnpService;
     private final AlarmDetailsListener alarmDetailsListener;
+    private final UnexpectedEventsListener unexpectedEventsListener;
 
-    public AlarmDetailsEmittingSubscriptionCallback(Service service, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener) {
+    public AlarmDetailsEmittingSubscriptionCallback(Service service, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
         super(service);
         this.upnpService = upnpService;
         this.alarmDetailsListener = alarmDetailsListener;
+        this.unexpectedEventsListener = unexpectedEventsListener;
     }
 
     @Override
     protected void failed(GENASubscription subscription, UpnpResponse responseStatus, Exception exception, String defaultMsg) {
-        System.err.println("Failed: " + defaultMsg);
+        unexpectedEventsListener.subscriptionFailed(subscription, responseStatus, exception, defaultMsg);
     }
 
     @Override
     protected void established(GENASubscription subscription) {
-        System.out.println("Established: " + subscription.getSubscriptionId());
+        // All good - hope to end up here.
     }
 
     @Override
     protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse responseStatus) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        unexpectedEventsListener.subscriptionEnded(subscription, reason, responseStatus);
     }
 
     @Override
@@ -42,13 +44,13 @@ final class AlarmDetailsEmittingSubscriptionCallback extends SubscriptionCallbac
         if (values.containsKey("AlarmListVersion")) {
             upnpService.getControlPoint().execute(new ListAlarmsActionCallback(alarmDetailsListener, new ActionInvocation(service.getAction("ListAlarms"))));
         } else {
-            System.out.println("No AlarmListVersion in event");
+            unexpectedEventsListener.noAlarmListVersionInEvent(subscription, values);
         }
     }
 
     @Override
     protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {
-        System.out.println("Missed events: " + numberOfMissedEvents);
+        unexpectedEventsListener.eventsMissed(subscription, numberOfMissedEvents);
     }
 
 }

@@ -13,7 +13,7 @@ public abstract class AlarmStatus {
     private AlarmStatus() {
     }
 
-    abstract AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener);
+    abstract AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener);
 
     static AlarmStatus noDevicesKnown() {
         return new NoDevicesKnownAlarmStatus();
@@ -21,8 +21,8 @@ public abstract class AlarmStatus {
 
     private static final class NoDevicesKnownAlarmStatus extends AlarmStatus {
         @Override
-        public AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener) {
-            return new DeviceKnownButNoAlarmsSubscriptions(device, upnpService, alarmDetailsListener);
+        public AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
+            return new DeviceKnownButNoAlarmsSubscriptions(device, upnpService, alarmDetailsListener, unexpectedEventsListener);
         }
     }
 
@@ -38,7 +38,7 @@ public abstract class AlarmStatus {
         }
 
         @Override
-        AlarmStatus deviceAdded(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener) {
+        AlarmStatus deviceAdded(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
             return new DeviceKnownAndAlarmSubscriptionsExist(new ArrayList<Device>() {{
                 for (Device existingDevice : devices) {
                     add(existingDevice);
@@ -51,14 +51,14 @@ public abstract class AlarmStatus {
     private static final class DeviceKnownButNoAlarmsSubscriptions extends AlarmStatus {
         private final Device device;
 
-        DeviceKnownButNoAlarmsSubscriptions(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener) {
+        DeviceKnownButNoAlarmsSubscriptions(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
             this.device = device;
             Service service = device.findService(ALARM_CLOCK);
-            upnpService.getControlPoint().execute(new AlarmDetailsEmittingSubscriptionCallback(service, upnpService, alarmDetailsListener));
+            upnpService.getControlPoint().execute(new AlarmDetailsEmittingSubscriptionCallback(service, upnpService, alarmDetailsListener, unexpectedEventsListener));
         }
 
         @Override
-        public AlarmStatus deviceAdded(final Device newDevice, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener) {
+        public AlarmStatus deviceAdded(final Device newDevice, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
             return new DeviceKnownAndAlarmSubscriptionsExist(new ArrayList<Device>() {{
                 add(device);
                 add(newDevice);
