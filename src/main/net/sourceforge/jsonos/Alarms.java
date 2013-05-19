@@ -17,7 +17,7 @@ public final class Alarms implements Iterable<Alarm> {
     private final List<Alarm> alarms;
 
     public Alarms(List<Alarm> alarms) {
-        this.alarms = new ArrayList<>(alarms);
+        this.alarms = new ArrayList<Alarm>(alarms);
     }
 
     public static Alarms parse(String alarmResults) {

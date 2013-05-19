@@ -16,7 +16,7 @@ import static net.sourceforge.jsonos.Alarm.enabledAlarm;
 final class AlarmParsingDefaultHandler extends DefaultHandler {
     private static final DateTimeFormatter TIME_FORMATTER = ISODateTimeFormat.localTimeParser();
 
-    private final List<Alarm> alarms = new LinkedList<>();
+    private final List<Alarm> alarms = new LinkedList<Alarm>();
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {

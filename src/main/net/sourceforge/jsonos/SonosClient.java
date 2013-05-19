@@ -16,7 +16,7 @@ import static com.google.common.collect.Iterables.any;
 import static java.util.Arrays.asList;
 import static java.util.logging.Level.WARNING;
 
-public final class SonosClient implements AutoCloseable {
+public final class SonosClient {
 
     static {
         final Logger topLogger = java.util.logging.Logger.getLogger("");
@@ -47,7 +47,6 @@ public final class SonosClient implements AutoCloseable {
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
     }
 
-    @Override
     public void close() throws Exception {
         upnpService.shutdown();
     }

@@ -83,18 +83,18 @@
         <!--<delete dir="${location.integration-testclasses}"/>-->
         <!--<mkdir dir="${location.integration-testclasses}"/>-->
 
-        <javac destdir="${location.classes}" debug="on" source="1.7" target="1.7" includeantruntime="false">
+        <javac destdir="${location.classes}" debug="on" source="1.6" target="1.6" includeantruntime="false">
             <src path="${location.src}"/>
             <classpath refid="shipped-libs"/>
         </javac>
 
-        <javac destdir="${location.optimisedclasses}" debug="on" optimize="true" source="1.7" target="1.7"
+        <javac destdir="${location.optimisedclasses}" debug="on" optimize="true" source="1.6" target="1.6"
                includeantruntime="false">
             <src path="${location.src}"/>
             <classpath refid="shipped-libs"/>
         </javac>
 
-        <!--<javac destdir="${location.documentationclasses}" debug="on" source="1.7" target="1.7"-->
+        <!--<javac destdir="${location.documentationclasses}" debug="on" source="1.6" target="1.6"-->
         <!--includeantruntime="false">-->
         <!--<src path="${location.src.documentation}"/>-->
         <!--<classpath location="${location.classes}"/>-->
@@ -102,7 +102,7 @@
         <!--<classpath refid="build-libs"/>-->
         <!--</javac>-->
 
-        <javac destdir="${location.test-support-classes}" debug="on" source="1.7" target="1.7"
+        <javac destdir="${location.test-support-classes}" debug="on" source="1.6" target="1.6"
                includeantruntime="false">
             <src path="${location.src.test-support}"/>
             <classpath location="${location.classes}"/>
@@ -110,7 +110,7 @@
             <classpath refid="test-compile-libs"/>
         </javac>
 
-        <javac destdir="${location.testclasses}" debug="on" source="1.7" target="1.7" includeantruntime="false">
+        <javac destdir="${location.testclasses}" debug="on" source="1.6" target="1.6" includeantruntime="false">
             <src path="${location.src.test}"/>
             <classpath location="${location.classes}"/>
             <classpath location="${location.test-support-classes}"/>
@@ -118,7 +118,7 @@
             <classpath refid="test-compile-libs"/>
         </javac>
 
-        <!--<javac destdir="${location.integration-testclasses}" debug="on" source="1.7" target="1.7"-->
+        <!--<javac destdir="${location.integration-testclasses}" debug="on" source="1.6" target="1.6"-->
         <!--includeantruntime="false">-->
         <!--<src path="${location.src.integration-test}"/>-->
         <!--<classpath location="${location.classes}"/>-->

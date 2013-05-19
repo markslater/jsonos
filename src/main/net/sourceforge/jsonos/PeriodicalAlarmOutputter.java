@@ -14,7 +14,7 @@ public final class PeriodicalAlarmOutputter {
                     public void run() {
                         System.out.println("alarmsListener.alarms() = " + alarmsListener.alarms());
                     }
-                }, 5, 5, TimeUnit.SECONDS
+                }, 1, 1, TimeUnit.MINUTES
         );
     }
 
