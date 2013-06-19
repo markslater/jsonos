@@ -18,6 +18,9 @@ import static java.util.logging.Level.WARNING;
 
 public final class SonosClient {
 
+    private final AlarmRegistryListener alarmRegistryListener;
+    private final UnexpectedEventsListener unexpectedEventsListener;
+
     static {
         final Logger topLogger = java.util.logging.Logger.getLogger("");
         find(asList(topLogger.getHandlers()), new Predicate<Handler>() {
@@ -43,8 +46,14 @@ public final class SonosClient {
     private final UpnpService upnpService;
 
     public SonosClient(final AlarmsListener alarmsListener, final UnexpectedEventsListener unexpectedEventsListener) {
-        upnpService = new UpnpServiceImpl(new AlarmRegistryListener(alarmsListener, unexpectedEventsListener));
+        this.unexpectedEventsListener = unexpectedEventsListener;
+        alarmRegistryListener = new AlarmRegistryListener(alarmsListener, this.unexpectedEventsListener);
+        upnpService = new UpnpServiceImpl(alarmRegistryListener);
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
+    }
+
+    public void snooze(final Alarm alarm) {
+        alarmRegistryListener.getAlarmStatus().snooze(upnpService, unexpectedEventsListener, alarm);
     }
 
     public void close() throws Exception {

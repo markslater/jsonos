@@ -26,7 +26,10 @@ final class AlarmParsingDefaultHandler extends DefaultHandler {
             final LocalTime startTime = TIME_FORMATTER.parseLocalTime(startTimeString); // TODO - what timezone is this in?
             final int enabledIndex = attributes.getIndex("Enabled");
             final String enabledString = attributes.getValue(enabledIndex);
-            alarms.add("1".equals(enabledString) ? enabledAlarm(startTime) : disabledAlarm(startTime));
+            final int idIndex = attributes.getIndex("ID");
+            final String idString = attributes.getValue(idIndex);
+            final int alarmId = Integer.parseInt(idString);
+            alarms.add("1".equals(enabledString) ? enabledAlarm(startTime, alarmId) : disabledAlarm(startTime, alarmId));
         }
     }
 

@@ -6,8 +6,14 @@ public class SonosClientTest {
 
     @Test
     public void findsZonePlayersWithAlarmRegistryListener() throws Exception {
-        final SonosClient sonosClient = new SonosClient(new SysOutAlarmsListener(), new SysErrUnexpectedEventsListener());
+        final SysOutAlarmsListener alarmsListener = new SysOutAlarmsListener();
+        final SonosClient sonosClient = new SonosClient(alarmsListener, new SysErrUnexpectedEventsListener());
         Thread.sleep(10000);
+        for (Alarm alarm : alarmsListener.alarms) {
+            sonosClient.snooze(alarm);
+        }
+        Thread.sleep(10000);
+        sonosClient.close();
     }
 
 }

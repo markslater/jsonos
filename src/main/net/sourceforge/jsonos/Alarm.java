@@ -4,8 +4,14 @@ import org.joda.time.LocalTime;
 
 public abstract class Alarm {
 
-    public static Alarm enabledAlarm(final LocalTime startTime) {
-        return new Alarm() {
+    public final int id;
+
+    private Alarm(final int id) {
+        this.id = id;
+    }
+
+    public static Alarm enabledAlarm(final LocalTime startTime, final int id) {
+        return new Alarm(id) {
             @Override
             public boolean isEnabled() {
                 return true;
@@ -15,6 +21,7 @@ public abstract class Alarm {
             public String toString() {
                 return "EnabledAlarm{" +
                         "startTime=" + startTime +
+                        ", id=" + id +
                         '}';
             }
 
@@ -22,8 +29,8 @@ public abstract class Alarm {
 
     }
 
-    public static Alarm disabledAlarm(final LocalTime startTime) {
-        return new Alarm() {
+    public static Alarm disabledAlarm(final LocalTime startTime, final int id) {
+        return new Alarm(id) {
             @Override
             public boolean isEnabled() {
                 return false;
@@ -33,12 +40,10 @@ public abstract class Alarm {
             public String toString() {
                 return "DisabledAlarm{" +
                         "startTime=" + startTime +
+                        ", id=" + id +
                         '}';
             }
         };
-    }
-
-    private Alarm() {
     }
 
     public abstract boolean isEnabled();

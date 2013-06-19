@@ -27,7 +27,7 @@ public final class AlarmRegistryListener extends DefaultRegistryListener { // TO
                     getAlarmStatus().deviceAdded(device, registry.getUpnpService(), alarmDetailsListener, unexpectedEventsListener)
             );
         } else {
-            // TODO got a callback from something unexpected
+            unexpectedEventsListener.unexpectedDeviceCallback(device);
         }
     }
 
