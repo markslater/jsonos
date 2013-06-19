@@ -23,7 +23,7 @@ public abstract class AlarmStatus {
 
     abstract AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener);
 
-    abstract void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Alarm alarm);
+    abstract void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener);
 
     static AlarmStatus noDevicesKnown() {
         return new NoDevicesKnownAlarmStatus();
@@ -36,7 +36,7 @@ public abstract class AlarmStatus {
         }
 
         @Override
-        void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Alarm alarm) {
+        void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
     }
@@ -63,9 +63,9 @@ public abstract class AlarmStatus {
         }
 
         @Override
-        void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Alarm alarm) {
+        void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
             for (Device device : devices) {
-                snooze(upnpService, unexpectedEventsListener, device, alarm);
+                snooze(upnpService, unexpectedEventsListener, device);
             }
         }
     }
@@ -88,14 +88,15 @@ public abstract class AlarmStatus {
         }
 
         @Override
-        void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Alarm alarm) {
-            snooze(upnpService, unexpectedEventsListener, device, alarm);
+        void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            snooze(upnpService, unexpectedEventsListener, device);
         }
 
     }
 
-    static void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Device device, final Alarm alarm) {
+    static void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Device device) {
         final Service avTransportService = device.findService(new UDAServiceId("AVTransport"));
+//        "GetRunningAlarmProperties";
         Action action = avTransportService.getAction("SnoozeAlarm");
         final ActionInvocation invocation = new ActionInvocation(action);
         Period snoozePeriod = Period.minutes(2);

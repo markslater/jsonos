@@ -52,8 +52,8 @@ public final class SonosClient {
         upnpService.getControlPoint().search(new UDADeviceTypeHeader(new UDADeviceType("ZonePlayer")));
     }
 
-    public void snooze(final Alarm alarm) {
-        alarmRegistryListener.getAlarmStatus().snooze(upnpService, unexpectedEventsListener, alarm);
+    public void snooze() {
+        alarmRegistryListener.getAlarmStatus().snooze(upnpService, unexpectedEventsListener);
     }
 
     public void close() throws Exception {
