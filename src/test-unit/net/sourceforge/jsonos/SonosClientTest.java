@@ -9,9 +9,7 @@ public class SonosClientTest {
         final SysOutAlarmsListener alarmsListener = new SysOutAlarmsListener();
         final SonosClient sonosClient = new SonosClient(alarmsListener, new SysErrUnexpectedEventsListener());
         Thread.sleep(10000);
-        for (Alarm alarm : alarmsListener.alarms) {
-            sonosClient.snooze();
-        }
+        sonosClient.snooze();
         Thread.sleep(10000);
         sonosClient.close();
     }
