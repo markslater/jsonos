@@ -23,7 +23,13 @@ public abstract class AlarmStatus {
 
     abstract AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener);
 
+    abstract void stop(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener);
+
     abstract void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener);
+
+    abstract void sleep(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener);
+
+    abstract void getRunningAlarms(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener);
 
     static AlarmStatus noDevicesKnown() {
         return new NoDevicesKnownAlarmStatus();
@@ -37,6 +43,21 @@ public abstract class AlarmStatus {
 
         @Override
         void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        void sleep(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        void getRunningAlarms(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        void stop(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
     }
@@ -63,9 +84,30 @@ public abstract class AlarmStatus {
         }
 
         @Override
+        void stop(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            for (Device device : devices) {
+                stop(upnpService, device);
+            }
+        }
+
+        @Override
         void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
             for (Device device : devices) {
                 snooze(upnpService, unexpectedEventsListener, device);
+            }
+        }
+
+        @Override
+        void sleep(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            for (Device device : devices) {
+                sleep(upnpService, unexpectedEventsListener, device);
+            }
+        }
+
+        @Override
+        void getRunningAlarms(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            for (Device device : devices) {
+                runningAlarms(upnpService, device);
             }
         }
     }
@@ -88,10 +130,24 @@ public abstract class AlarmStatus {
         }
 
         @Override
+        void stop(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            stop(upnpService, device);
+        }
+
+        @Override
         void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
             snooze(upnpService, unexpectedEventsListener, device);
         }
 
+        @Override
+        void sleep(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            sleep(upnpService, unexpectedEventsListener, device);
+        }
+
+        @Override
+        void getRunningAlarms(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
+            runningAlarms(upnpService, device);
+        }
     }
 
     static void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Device device) {
@@ -111,6 +167,74 @@ public abstract class AlarmStatus {
 
         try {
             invocation.setInput("Duration", pFormatter.print(snoozePeriod));
+        } catch (InvalidValueException e) {
+            unexpectedEventsListener.invalidValueSettingSnoozePeriod(e);
+        }
+        new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
+        ActionException anException = invocation.getFailure();
+        if (anException != null && anException.getMessage() != null) {
+            System.out.println("anException.getMessage() = " + anException.getMessage());
+        }
+    }
+
+    static void runningAlarms(final UpnpService upnpService, final Device device) {
+        final Service avTransportService = device.findService(new UDAServiceId("AVTransport"));
+        Action action = avTransportService.getAction("GetRunningAlarmProperties");
+        final ActionInvocation invocation = new ActionInvocation(action);
+        new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
+        ActionException anException = invocation.getFailure();
+        System.out.println("invocation = " + invocation.getOutputMap());
+        if (anException != null && anException.getMessage() != null) {
+            System.out.println("anException.getMessage() = " + anException.getMessage());
+        }
+    }
+
+    static void stop(final UpnpService upnpService, final Device device) {
+
+
+        final Service avTransportService = device.findService(new UDAServiceId("AVTransport"));
+//        final ActionInvocation alarmRunningInvocation = new ActionInvocation(avTransportService.getQueryStateVariableAction());
+//        alarmRunningInvocation.setInput("varName", "AlarmRunning");
+//        new ActionCallback.Default(alarmRunningInvocation, upnpService.getControlPoint()).run();
+//        System.out.println("alarmRunningInvocation.getOutputMap() = " + alarmRunningInvocation.getOutputMap());
+////        varName
+        upnpService.getControlPoint().execute(new AlarmStateEmittingSubscriptionCallback(avTransportService, null));
+
+
+        Action action = avTransportService.getAction("Stop");
+        final ActionInvocation invocation = new ActionInvocation(action);
+        new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
+        ActionException anException = invocation.getFailure();
+        if (anException != null && anException.getMessage() != null) {
+            System.out.println("anException.getMessage() = " + anException.getMessage());
+        }
+    }
+
+    static void sleep(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Device device) {
+        final Service avTransportService = device.findService(new UDAServiceId("AVTransport"));
+        Action playAction = avTransportService.getAction("Play");
+        final ActionInvocation playInvocation = new ActionInvocation(playAction);
+        playInvocation.setInput("Speed", "1");
+        new ActionCallback.Default(playInvocation, upnpService.getControlPoint()).run();
+        ActionException playException = playInvocation.getFailure();
+        if (playException != null && playException.getMessage() != null) {
+            System.out.println("anException.getMessage() = " + playException.getMessage());
+        }
+
+        Action action = avTransportService.getAction("ConfigureSleepTimer");
+        final ActionInvocation invocation = new ActionInvocation(action);
+        Period snoozePeriod = Period.minutes(2);
+        PeriodFormatter pFormatter = new PeriodFormatterBuilder()
+                .printZeroAlways()
+                .appendHours()
+                .appendSeparator(":")
+                .appendMinutes()
+                .appendSeparator(":")
+                .appendSeconds()
+                .toFormatter();
+
+        try {
+            invocation.setInput("NewSleepTimerDuration", pFormatter.print(snoozePeriod));
         } catch (InvalidValueException e) {
             unexpectedEventsListener.invalidValueSettingSnoozePeriod(e);
         }

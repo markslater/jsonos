@@ -56,6 +56,18 @@ public final class SonosClient {
         alarmRegistryListener.getAlarmStatus().snooze(upnpService, unexpectedEventsListener);
     }
 
+    public void sleep() {
+        alarmRegistryListener.getAlarmStatus().sleep(upnpService, unexpectedEventsListener);
+    }
+
+    public void runningAlarms() {
+        alarmRegistryListener.getAlarmStatus().getRunningAlarms(upnpService, unexpectedEventsListener);
+    }
+
+    public void stop() {
+        alarmRegistryListener.getAlarmStatus().stop(upnpService, unexpectedEventsListener);
+    }
+
     public void close() throws Exception {
         upnpService.shutdown();
     }

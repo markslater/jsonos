@@ -1,5 +1,6 @@
 package net.sourceforge.jsonos;
 
+import com.google.common.base.Optional;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -8,25 +9,25 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-public final class Alarms implements Iterable<Alarm> {
+final class AvTransportStateVariables {
+    private final Optional<Boolean> alarmRunning;
 
-    private final List<Alarm> alarms;
-
-    public Alarms(List<Alarm> alarms) {
-        this.alarms = new ArrayList<Alarm>(alarms);
+    public AvTransportStateVariables(final Optional<Boolean> isAlarmRunning) {
+        alarmRunning = isAlarmRunning;
     }
 
-    public static Alarms parse(String alarmResults) {
+    static AvTransportStateVariables parseInitialState(String stateVariablesXml) {
+        return new AvTransportStateVariables(Optional.<Boolean>absent()).parse(stateVariablesXml);
+    }
+
+    AvTransportStateVariables parse(String stateVariablesXml) {
         final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();  // TODO - make pool?  This isn't threadsafe, but might be expensive
         saxParserFactory.setNamespaceAware(true);
-        final AlarmParsingDefaultHandler alarmParsingDefaultHandler = new AlarmParsingDefaultHandler();
+        final AlarmsRunningParsingDefaultHandler alarmParsingDefaultHandler = new AlarmsRunningParsingDefaultHandler(alarmRunning);
         try {
             final SAXParser saxParser = saxParserFactory.newSAXParser();
-            saxParser.parse(new InputSource(new StringReader(alarmResults)), alarmParsingDefaultHandler);
+            saxParser.parse(new InputSource(new StringReader(stateVariablesXml)), alarmParsingDefaultHandler);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (SAXException e) {
@@ -34,18 +35,10 @@ public final class Alarms implements Iterable<Alarm> {
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        return alarmParsingDefaultHandler.alarms();
+        return alarmParsingDefaultHandler.avTransportStateVariables();
     }
 
-    @Override
-    public Iterator<Alarm> iterator() {
-        return alarms.iterator();
-    }
-
-    @Override
-    public String toString() {
-        return "Alarms{" +
-                "alarms=" + alarms +
-                '}';
+    public boolean isAlarmRunning() {
+        return alarmRunning.or(false);
     }
 }

@@ -10,7 +10,7 @@ import org.teleal.cling.model.types.InvalidValueException;
 import java.util.Arrays;
 import java.util.Map;
 
-final class SysErrUnexpectedEventsListener implements UnexpectedEventsListener {
+public final class SysErrUnexpectedEventsListener implements UnexpectedEventsListener {
     @Override
     public void subscriptionEnded(final GENASubscription subscription, final CancelReason reason, final UpnpResponse responseStatus) {
         System.err.println("unexpected subscription ended{subscription{" + subscription + "}, reason{" + reason + "}, responseStatus{" + responseStatus + "}}");

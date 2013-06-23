@@ -11,6 +11,7 @@ public class SonosClientTest {
         Thread.sleep(10000);
         sonosClient.snooze();
         Thread.sleep(10000);
+        sonosClient.sleep();
         sonosClient.close();
     }
 

@@ -20,7 +20,7 @@ final class AlarmParsingDefaultHandler extends DefaultHandler {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if ("Alarm".equals(qName)) {
+        if ("Alarm".equals(localName)) {
             final int startTimeIndex = attributes.getIndex("StartTime");
             final String startTimeString = attributes.getValue(startTimeIndex);
             final LocalTime startTime = TIME_FORMATTER.parseLocalTime(startTimeString); // TODO - what timezone is this in?
