@@ -15,13 +15,15 @@ import org.teleal.cling.model.types.UDAServiceId;
 
 import java.util.ArrayList;
 
+import static org.joda.time.Period.minutes;
+
 public abstract class AlarmStatus {
     private static final UDAServiceId ALARM_CLOCK = new UDAServiceId("AlarmClock");
 
     private AlarmStatus() {
     }
 
-    abstract AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener);
+    abstract AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final AlarmStateListener alarmStateListener, final UnexpectedEventsListener unexpectedEventsListener);
 
     abstract void stop(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener);
 
@@ -37,8 +39,8 @@ public abstract class AlarmStatus {
 
     private static final class NoDevicesKnownAlarmStatus extends AlarmStatus {
         @Override
-        public AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
-            return new DeviceKnownButNoAlarmsSubscriptions(device, upnpService, alarmDetailsListener, unexpectedEventsListener);
+        public AlarmStatus deviceAdded(final Device device, UpnpService upnpService, AlarmDetailsListener alarmDetailsListener, final AlarmStateListener alarmStateListener, final UnexpectedEventsListener unexpectedEventsListener) {
+            return new DeviceKnownButNoAlarmsSubscriptions(device, upnpService, alarmDetailsListener, alarmStateListener, unexpectedEventsListener);
         }
 
         @Override
@@ -74,7 +76,7 @@ public abstract class AlarmStatus {
         }
 
         @Override
-        AlarmStatus deviceAdded(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
+        AlarmStatus deviceAdded(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final AlarmStateListener alarmStateListener, final UnexpectedEventsListener unexpectedEventsListener) {
             return new DeviceKnownAndAlarmSubscriptionsExist(new ArrayList<Device>() {{
                 for (Device existingDevice : devices) {
                     add(existingDevice);
@@ -115,14 +117,16 @@ public abstract class AlarmStatus {
     private static final class DeviceKnownButNoAlarmsSubscriptions extends AlarmStatus {
         private final Device device;
 
-        DeviceKnownButNoAlarmsSubscriptions(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
+        DeviceKnownButNoAlarmsSubscriptions(final Device device, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final AlarmStateListener alarmStateListener, final UnexpectedEventsListener unexpectedEventsListener) {
             this.device = device;
-            Service service = device.findService(ALARM_CLOCK);
-            upnpService.getControlPoint().execute(new AlarmDetailsEmittingSubscriptionCallback(service, upnpService, alarmDetailsListener, unexpectedEventsListener));
+            Service avTransportService = device.findService(new UDAServiceId("AVTransport"));
+            upnpService.getControlPoint().execute(new AlarmStateEmittingSubscriptionCallback(avTransportService, alarmStateListener, unexpectedEventsListener));
+            Service alarmClockService = device.findService(ALARM_CLOCK);
+            upnpService.getControlPoint().execute(new AlarmDetailsEmittingSubscriptionCallback(alarmClockService, upnpService, alarmDetailsListener, unexpectedEventsListener));
         }
 
         @Override
-        public AlarmStatus deviceAdded(final Device newDevice, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final UnexpectedEventsListener unexpectedEventsListener) {
+        public AlarmStatus deviceAdded(final Device newDevice, final UpnpService upnpService, final AlarmDetailsListener alarmDetailsListener, final AlarmStateListener alarmStateListener, final UnexpectedEventsListener unexpectedEventsListener) {
             return new DeviceKnownAndAlarmSubscriptionsExist(new ArrayList<Device>() {{
                 add(device);
                 add(newDevice);
@@ -148,6 +152,7 @@ public abstract class AlarmStatus {
         void getRunningAlarms(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener) {
             runningAlarms(upnpService, device);
         }
+
     }
 
     static void snooze(final UpnpService upnpService, final UnexpectedEventsListener unexpectedEventsListener, final Device device) {
@@ -155,7 +160,7 @@ public abstract class AlarmStatus {
 //        "GetRunningAlarmProperties";
         Action action = avTransportService.getAction("SnoozeAlarm");
         final ActionInvocation invocation = new ActionInvocation(action);
-        Period snoozePeriod = Period.minutes(2);
+        Period snoozePeriod = minutes(2);
         PeriodFormatter pFormatter = new PeriodFormatterBuilder()
                 .printZeroAlways()
                 .appendHours()
@@ -190,17 +195,7 @@ public abstract class AlarmStatus {
     }
 
     static void stop(final UpnpService upnpService, final Device device) {
-
-
         final Service avTransportService = device.findService(new UDAServiceId("AVTransport"));
-//        final ActionInvocation alarmRunningInvocation = new ActionInvocation(avTransportService.getQueryStateVariableAction());
-//        alarmRunningInvocation.setInput("varName", "AlarmRunning");
-//        new ActionCallback.Default(alarmRunningInvocation, upnpService.getControlPoint()).run();
-//        System.out.println("alarmRunningInvocation.getOutputMap() = " + alarmRunningInvocation.getOutputMap());
-////        varName
-        upnpService.getControlPoint().execute(new AlarmStateEmittingSubscriptionCallback(avTransportService, null));
-
-
         Action action = avTransportService.getAction("Stop");
         final ActionInvocation invocation = new ActionInvocation(action);
         new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
@@ -223,7 +218,7 @@ public abstract class AlarmStatus {
 
         Action action = avTransportService.getAction("ConfigureSleepTimer");
         final ActionInvocation invocation = new ActionInvocation(action);
-        Period snoozePeriod = Period.minutes(2);
+        Period snoozePeriod = minutes(2);
         PeriodFormatter pFormatter = new PeriodFormatterBuilder()
                 .printZeroAlways()
                 .appendHours()

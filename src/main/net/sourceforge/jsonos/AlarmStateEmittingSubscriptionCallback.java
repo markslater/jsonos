@@ -1,6 +1,5 @@
 package net.sourceforge.jsonos;
 
-import com.google.common.base.Optional;
 import org.teleal.cling.controlpoint.SubscriptionCallback;
 import org.teleal.cling.model.gena.CancelReason;
 import org.teleal.cling.model.gena.GENASubscription;
@@ -10,10 +9,12 @@ import org.teleal.cling.model.meta.Service;
 import org.teleal.cling.model.state.StateVariableValue;
 
 final class AlarmStateEmittingSubscriptionCallback extends SubscriptionCallback {
+    private final AlarmStateListener alarmStateListener;
     private final UnexpectedEventsListener unexpectedEventsListener;
 
-    public AlarmStateEmittingSubscriptionCallback(Service service, final UnexpectedEventsListener unexpectedEventsListener) {
+    public AlarmStateEmittingSubscriptionCallback(Service service, final AlarmStateListener alarmStateListener, final UnexpectedEventsListener unexpectedEventsListener) {
         super(service);
+        this.alarmStateListener = alarmStateListener;
         this.unexpectedEventsListener = unexpectedEventsListener;
     }
 
@@ -35,7 +36,7 @@ final class AlarmStateEmittingSubscriptionCallback extends SubscriptionCallback 
     @Override
     protected void eventReceived(GENASubscription subscription) {
         final String lastChange = (String) ((StateVariableValue) (((RemoteGENASubscription) subscription).getCurrentValues().get("LastChange"))).getValue();
-        System.out.println("new AvTransportStateVariables(Optional.<Boolean>absent()).parse(lastChange).isAlarmRunning() = " + new AvTransportStateVariables(Optional.<Boolean>absent()).parse(lastChange).isAlarmRunning());
+        alarmStateListener.gotStateChange(lastChange);
     }
 
     @Override

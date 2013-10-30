@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 public final class AvTransportStateVariablesTest {
     @Test
-    public void parsesSampleAvTransportStateVariablesXml() throws Exception {
+    public void parsesSampleAvTransportStateVariablesXmlForAlarm() throws Exception {
         assertThat(AvTransportStateVariables.parseInitialState("<Event xmlns=\"urn:schemas-upnp-org:metadata-1-0/AVT/\" xmlns:r=\"urn:schemas-rinconnetworks-com:metadata-1-0/\">\n" +
                 "<InstanceID val=\"0\">\n" +
                 "<TransportState val=\"PLAYING\"/>\n" +
@@ -30,5 +30,14 @@ public final class AvTransportStateVariablesTest {
                 "<r:AlarmRunning val=\"1\"/>\n" +
                 "</InstanceID>\n" +
                 "</Event>").isAlarmRunning(), equalTo(true));
+    }
+
+    @Test
+    public void parsesSampleAvTransportStateVariablesXmlForSleepTimer() throws Exception {
+        assertThat(AvTransportStateVariables.parseInitialState("<Event xmlns=\"urn:schemas-upnp-org:metadata-1-0/AVT/\" xmlns:r=\"urn:schemas-rinconnetworks-com:metadata-1-0/\">\n" +
+                "    <InstanceID val=\"0\">\n" +
+                "        <r:SleepTimerGeneration val=\"5\"/>\n" +
+                "    </InstanceID>\n" +
+                "</Event>").isAlarmRunning(), equalTo(false));
     }
 }
