@@ -267,15 +267,20 @@
         <delete dir="${location.dist}"/>
         <mkdir dir="${location.dist.binaries}"/>
 
-        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${location.lib}/build/jarjar-1.4.jar"/>
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
+                 classpath="${location.lib}/build/jarjar-1.4.jar"/>
         <jarjar basedir="${location.classes}" destfile="${location.dist.binaries}/jsonos-${version}.jar">
             <zipfileset src="${location.lib}/shipped/cling-core-1.0.5.jar"/>
             <zipfileset src="${location.lib}/shipped/commons-lang3-3.1.jar"/>
             <zipfileset src="${location.lib}/shipped/guava-14.0-rc1.jar"/>
             <zipfileset src="${location.lib}/shipped/joda-time-2.1.jar"/>
             <zipfileset src="${location.lib}/shipped/teleal-common-1.0.13.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-core.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-device.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-gpio-extension.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-service.jar"/>
             <manifest>
-                <attribute name="Main-Class" value="net.sourceforge.jsonos.PeriodicalAlarmOutputter"/>
+                <attribute name="Main-Class" value="net.sourceforge.jsonos.pi.gpio.PiAlarmSnooze"/>
             </manifest>
         </jarjar>
         <chmod file="${location.dist.binaries}/jsonos-${version}.jar" perm="u+x"/>
@@ -287,6 +292,10 @@
             <zipfileset src="${location.lib}/shipped/guava-14.0-rc1.jar"/>
             <zipfileset src="${location.lib}/shipped/joda-time-2.1.jar"/>
             <zipfileset src="${location.lib}/shipped/teleal-common-1.0.13.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-core.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-device.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-gpio-extension.jar"/>
+            <zipfileset src="${location.lib}/shipped/pi4j-service.jar"/>
             <manifest>
                 <attribute name="Main-Class" value="net.sourceforge.jsonos.SelfTest"/>
             </manifest>
